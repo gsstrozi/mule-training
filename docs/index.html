@@ -78,6 +78,14 @@
                                                                                                                                                                                                                                 </ul>
               </div>
             </div>
+                      <li data-toggle="collapse" data-target="#_db_to_dbNav"><a href="#_db_to_db"><i class="icon-chevron-right"></i> db-to-db</a>
+            </li>
+            <div id="_db_to_dbNav" class="accordion-body collapse" style="height: 0px;">
+              <div class="accordion-inner">
+                <ul>
+                                                                                                                                                                                                                                                                                                            </ul>
+              </div>
+            </div>
                   </ul>
       </div>
       <div class="span9">
@@ -87,7 +95,7 @@
         <div style="max-height: 640px;width:100%;overflow:auto;">
                       <img src="img/mule_training.png" usemap="#mFlowMap" alt="Mule Configuration Image">
             <map name="mFlowMap">
-                                                                                                                                                                                                      </map>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                  </map>
                   </div>
         <!--Mule configuration xml code-->
         <div class="accordion-heading">
@@ -97,24 +105,7 @@
         </div>
         <div id="collapseMuleConfiguration" class="accordion-body collapse" style="height: 0px;">
           <div class="accordion-inner">
-              <pre class="prettyprint"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-
-&lt;mule xmlns="http://www.mulesoft.org/schema/mule/core" version="EE-3.8.0"&gt;
-    &lt;http:listener-config xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" name="HTTP_Listener_Configuration" host="0.0.0.0" port="8080" doc:name="HTTP Listener Configuration"&gt; &lt;/http:listener-config&gt;
-    &lt;http:request-config xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" name="HTTP_Request_Configuration" host="jsonplaceholder.typicode.com" port="80" responseTimeout="30000" doc:name="HTTP Request Configuration"&gt; &lt;/http:request-config&gt;
-    &lt;db:mysql-config xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" name="MySQL_Configuration" host="127.0.0.1" port="3306" user="root" password="mysql" database="mule" doc:name="MySQL Configuration"&gt;   &lt;/db:mysql-config&gt;
-    &lt;flow xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" name="http-json-insert-simple" doc:description="FLUXO SIMPLES  1. Consome API REST 2. Converte (Transformer) JSON Request em Object 3. Percorre com For Each 4. Inserindo no Banco de Dados"&gt;
-        &lt;http:listener xmlns:http="http://www.mulesoft.org/schema/mule/http" config-ref="HTTP_Listener_Configuration" path="/user" doc:name="HTTP"&gt; &lt;/http:listener&gt;
-        &lt;http:request xmlns:http="http://www.mulesoft.org/schema/mule/http" config-ref="HTTP_Request_Configuration" path="/users" method="GET" doc:name="HTTP"&gt; &lt;/http:request&gt;
-        &lt;json:json-to-object-transformer xmlns:json="http://www.mulesoft.org/schema/mule/json" returnClass="java.lang.Object" doc:name="JSON to Object"&gt;    &lt;/json:json-to-object-transformer&gt;
-        &lt;foreach doc:name="For Each"&gt;
-            &lt;db:insert xmlns:db="http://www.mulesoft.org/schema/mule/db" config-ref="MySQL_Configuration" doc:name="Database"&gt;
-                &lt;db:dynamic-query&gt;&lt;![CDATA[INSERT INTO TB_USERS (name,username,email) VALUES ('#[payload.name]','#[payload.username]','#[payload.email]')]]&gt;    &lt;/db:dynamic-query&gt;
-            &lt;/db:insert&gt;
-        &lt;/foreach&gt;
-    &lt;/flow&gt;
-&lt;/mule&gt;
-</code></pre>
+              
 
           </div>
         </div>
@@ -138,8 +129,8 @@
                 <div class="accordion-inner">
                     <pre class="prettyprint"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
-&lt;flow name="http-json-insert-simple" doc:description="FLUXO SIMPLES  1. Consome API REST 2. Converte (Transformer) JSON Request em Object 3. Percorre com For Each 4. Inserindo no Banco de Dados"&gt;
-    &lt;http:listener config-ref="HTTP_Listener_Configuration" path="/user" doc:name="HTTP"&gt;   &lt;/http:listener&gt;
+&lt;flow name="http-json-insert-simple" doc:description="FLUXO SIMPLES    1. Consome API REST   2. Converte (Transformer) JSON Request em Object   3. Percorre com For Each   4. Inserir Registros no Banco de Dados"&gt;
+    &lt;http:listener config-ref="HTTP_Listener_Configuration" path="/JSON/User" doc:name="HTTP"&gt;  &lt;/http:listener&gt;
     &lt;http:request config-ref="HTTP_Request_Configuration" path="/users" method="GET" doc:name="HTTP"&gt;   &lt;/http:request&gt;
     &lt;json:json-to-object-transformer returnClass="java.lang.Object" doc:name="JSON to Object"&gt;  &lt;/json:json-to-object-transformer&gt;
     &lt;foreach doc:name="For Each"&gt;
@@ -152,17 +143,49 @@
 
                 </div>
               </div>
-              <p><p>FLUXO SIMPLES</p>
+              <p><p>FLUXO SIMPLES  </p>
 
 <ol>
-<li>Consome API REST</li>
-<li>Converte (Transformer) JSON Request em Object</li>
-<li>Percorre com For Each</li>
-<li>Inserindo no Banco de Dados</li>
+<li><p>Consome API REST </p></li>
+<li><p>Converte (Transformer) JSON Request em Object </p></li>
+<li><p>Percorre com For Each </p></li>
+<li><p>Inserir Registros no Banco de Dados</p></li>
 </ol>
 </p>
             </div>
                                                                                                                                                         </section>
+                  <section id="_db_to_db">
+            <div class="page-header">
+                <h1>db-to-db <img src="./assets/icons/flow.png"></h1>
+            </div>
+            <div class="documentation-indented" style="height:100%;width:100%;overflow:auto;">
+                              <img src="img/db_to_db.png" usemap="#flowMapdb_to_db" alt="db_to_db image">
+                <map name="flowMapdb_to_db">
+                                                                                                                                                                                                                                                                                                            </map>
+                          </div>
+            <div class="documentation-indented">
+              <div class="accordion-heading">
+                                <a class="accordion-toggle" data-toggle="collapse" href="#_db_to_dbxml_code">
+                  Show configuration XML code of the flow db-to-db...
+                </a>
+              </div>
+              <div id="_db_to_dbxml_code" class="accordion-body collapse" style="height: 0px;">
+                <div class="accordion-inner">
+                    
+
+                </div>
+              </div>
+              <p><p>FLUXO SIMPLES   </p>
+
+<ol>
+<li><p>Busca as Informações em Determinado Bando de Dados. Caso Passado o Parâmetro "Id" Busca por Usuário Específico. </p></li>
+<li><p>Converte as Informações em Object </p></li>
+<li><p>Percorre com For Each </p></li>
+<li><p>Insere os Registros em Outros Banco de Dados</p></li>
+</ol>
+</p>
+            </div>
+                                                                                                                                                                                                            </section>
               </div>
     </div>
   </div>
