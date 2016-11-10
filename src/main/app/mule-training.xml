@@ -12,14 +12,76 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
     <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8080" doc:name="HTTP Listener Configuration"/>
     <http:request-config name="HTTP_Request_Configuration" host="jsonplaceholder.typicode.com" port="80" responseTimeout="30000" doc:name="HTTP Request Configuration"/>
     <db:mysql-config name="MySQL_Configuration" host="127.0.0.1" port="3306" user="root" password="mysql" database="mule" doc:name="MySQL Configuration"/>
-    <flow name="http-json-insert-simple" doc:description="FLUXO SIMPLES
+    <http:request-config name="HTTP_Request_Configuration_RAML" protocol="HTTPS" host="mocksvc.mulesoft.com" port="443" basePath="/mocks/e68891a8-60cb-42ab-b5cc-3e2ad7c2390f/funcionarios" doc:name="HTTP Request Configuration" responseTimeout="30000">
+        <http:raml-api-configuration location="api.raml"/>
+    </http:request-config>
+    <flow name="http-rest-complete">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/*" doc:name="HTTP"/>
+        <logger message="#[message.inboundProperties.'http.request.path'.trim().equalsIgnoreCase(&quot;/users&quot;)]" level="INFO" doc:name="Logger"/>
+        <choice doc:name="Choice">
+            <when expression="#[message.inboundProperties.'http.request.path'.trim().equalsIgnoreCase(&quot;/users&quot;)]">
+                <http:request config-ref="HTTP_Request_Configuration" path="#[message.inboundProperties.'http.request.path']" method="GET" doc:name="HTTP - Users">
+                    <http:request-builder>
+                        <http:query-param paramName="id" value="#[message.inboundProperties.'http.query.params'.id]"/>
+                    </http:request-builder>
+                </http:request>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.trim().equalsIgnoreCase(&quot;/posts&quot;)]">
+                <http:request config-ref="HTTP_Request_Configuration" path="#[message.inboundProperties.'http.request.path']" method="GET" doc:name="HTTP - Posts">
+                    <http:request-builder>
+                        <http:query-param paramName="userId" value="#[message.inboundProperties.'http.query.params'.userId]"/>
+                    </http:request-builder>
+                </http:request>
+            </when>
+            <otherwise>
+                <logger message="Servi&#231;o N&#227;o Encontrado" level="INFO" doc:name="Logger - Servi&#231;o n&#227;o Encontrado"/>
+            </otherwise>
+        </choice>
+    </flow>
+    <flow name="db-get-users">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/DB/GetUsers" doc:name="HTTP"/>
+        <db:select config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[SELECT * FROM TB_USERS]]></db:parameterized-query>
+        </db:select>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+    <flow name="http-json-insert-simple" doc:description="FLUXO SIMPLES  
 
-1. Consome API REST
-2. Converte (Transformer) JSON Request em Object
-3. Percorre com For Each
-4. Inserindo no Banco de Dados">
-        <http:listener config-ref="HTTP_Listener_Configuration" path="/user" doc:name="HTTP"/>
+1. Consome API REST 
+
+2. Converte (Transformer) JSON Request em Object 
+
+3. Percorre com For Each 
+
+4. Inserir Registros no Banco de Dados">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/JSON/User" doc:name="HTTP"/>
         <http:request config-ref="HTTP_Request_Configuration" path="/users" method="GET" doc:name="HTTP"/>
+        <json:json-to-object-transformer returnClass="java.lang.Object" doc:name="JSON to Object"/>
+        <foreach doc:name="For Each">
+            <db:insert config-ref="MySQL_Configuration" doc:name="Database">
+                <db:dynamic-query><![CDATA[INSERT INTO TB_USERS (name,username,email) VALUES ('#[payload.name]','#[payload.username]','#[payload.email]')]]></db:dynamic-query>
+            </db:insert>
+        </foreach>
+    </flow>
+    <flow name="raml-func">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/RAML/Funcionarios" doc:name="HTTP"/>
+        <http:request config-ref="HTTP_Request_Configuration_RAML" path="/funcionarios" method="GET" doc:name="HTTP"/>
+    </flow>
+    <flow name="db-to-db" doc:description="FLUXO SIMPLES   
+
+1. Busca as Informa&#231;&#245;es em Determinado Bando de Dados. Caso Passado o Par&#226;metro &quot;Id&quot; Busca por Usu&#225;rio Espec&#237;fico. 
+
+2. Converte as Informa&#231;&#245;es em Object 
+
+3. Percorre com For Each 
+
+4. Insere os Registros em Outros Banco de Dados">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/DB/User" doc:name="HTTP"/>
+        <logger message="SELECT name,username,email FROM TB_USERS WHERE CASE WHEN #[message.inboundProperties.'http.query.params'.Id] != null THEN Id = #[message.inboundProperties.'http.query.params'.Id] ELSE TRUE END" level="INFO" doc:name="Logger"/>
+        <db:select config-ref="MySQL_Configuration" doc:name="Database">
+            <db:dynamic-query><![CDATA[SELECT name,username,email FROM TB_USERS WHERE CASE WHEN COALESCE(#[message.inboundProperties.'http.query.params'.Id],0) > 0 THEN Id = #[message.inboundProperties.'http.query.params'.Id] ELSE TRUE END]]></db:dynamic-query>
+        </db:select>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
         <json:json-to-object-transformer returnClass="java.lang.Object" doc:name="JSON to Object"/>
         <foreach doc:name="For Each">
             <db:insert config-ref="MySQL_Configuration" doc:name="Database">
