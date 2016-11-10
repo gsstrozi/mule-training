@@ -1,0 +1,38 @@
+#%RAML 0.8
+title: Funcionarios
+version: 1.0
+#baseUri: http://gsschneider/funcionarios
+baseUri: https://mocksvc.mulesoft.com/mocks/e68891a8-60cb-42ab-b5cc-3e2ad7c2390f/funcionarios
+schemas:
+ - funcionarios: !include funcionarios.schema
+/funcionarios:
+  get:
+    description: Retornando Funcionarios
+    responses:
+      200:
+        body:
+          application/json:
+            schema: funcionarios
+            example: |
+              {
+                "status":"S001",
+                "funcionarios": [
+                  {
+                    "id":1,
+                    "nome":"Jose Coutinho",
+                    "email":"jc@corpx.com"
+                  },
+                  {
+                    "id":2,
+                    "nome":"Carlos Henrique Lopes",
+                    "email":"chl@corpx.com" 
+                  }
+                ]
+              }
+      404:
+        body:
+          application/json:
+            example: |
+              {
+                "status":"E001"
+              }
